@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hi Eithan</title>
+    <script>
+        let assignments = JSON.parse(localStorage.getItem("assignments")) || {};
+        let completedAssignments = JSON.parse(localStorage.getItem("completedAssignments")) || {};
+
+        function loadAssignments() {
+            let assignmentList = document.getElementById("assignmentList");
+            assignmentList.innerHTML = "";
+            Object.keys(assignments).forEach(name => {
+                if (!completedAssignments[name]) {
+                    let btn = document.createElement("button");
+                    btn.innerText = name;
+                    btn.onclick = () => startAssignment(name);
+                    assignmentList.appendChild(btn);
+                }
+            });
+        }
+
+        function startAssignment(assignmentName) {
+            let results = { correct: 0, wrong: 0, details: [] };
+            assignments[assignmentName].forEach(q => {
+                let userAnswer = prompt(q.replace("/", "÷"));
+                let correctAnswer = eval(q.replace("x", "*").replace("÷", "/"));
+                if (parseFloat(userAnswer) === correctAnswer) {
+                    results.correct++;
+                    results.details.push({ question: q, userAnswer, correct: true });
+                } else {
+                    results.wrong++;
+                    results.details.push({ question: q, userAnswer, correct: false, correctAnswer });
+                }
+            });
+            completedAssignments[assignmentName] = results;
+            localStorage.setItem("completedAssignments", JSON.stringify(completedAssignments));
+            displayResults(assignmentName, results);
+        }
+
+        function displayResults(assignmentName, results) {
+            let resultSection = document.getElementById("results");
+            resultSection.innerHTML = `<h2>Results for ${assignmentName}</h2>`;
+            results.details.forEach(entry => {
+                if (!entry.correct) {
+                    resultSection.innerHTML += `<p>${entry.question} - Your Answer: ${entry.userAnswer}, Correct Answer: ${entry.correctAnswer}</p>`;
+                }
+            });
+            if ((results.correct / (results.correct + results.wrong)) === 1) {
+                chooseGame();
+            }
+            loadAssignments();
+        }
+        
+        function chooseGame() {
+            let game = prompt("Choose a game: Shell Shockers, Slope, Ice DoDo, Slope Run, Subway Surfers, Slow Roads").toLowerCase();
+            let gameUrls = {
+                "shell shockers": "https://shellshock.io",
+                "slope": "https://slopeio.org/game/slope/",
+                "ice dodo": "https://icedodo.onionfist.com/",
+                "slope run": "https://sloperun.github.io/",
+                "subway surfers": "https://subwaysurfersgame.io/subway-surfers-game.embed?id=20241122",
+                "slow roads": "https://slowroads.io/"
+            };
+            
+            if (gameUrls[game]) {
+                document.getElementById("gameFrame").src = gameUrls[game];
+                document.getElementById("gameSection").style.display = "block";
+                startTimer();
+            }
+        }
+        
+        function startTimer() {
+            let timer = 60;
+            let interval = setInterval(() => {
+                document.getElementById("timer").innerText = `Time Left: ${timer}s`;
+                if (timer-- <= 0) {
+                    clearInterval(interval);
+                    document.getElementById("gameSection").style.display = "none";
+                }
+            }, 1000);
+        }
+    </script>
+</head>
+<body onload="loadAssignments()">
+    <h1>Hi Eithan</h1>
+    <div id="assignmentList"></div>
+    <div id="results"></div>
+    <div id="gameSection" style="display:none;">
+        <h2 id="timer">Time Left: 60s</h2>
+        <iframe id="gameFrame" width="100%" height="600px"></iframe>
+    </div>
+</body>
+</html>
