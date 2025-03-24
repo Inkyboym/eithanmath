@@ -1,0 +1,43 @@
+<html>
+<head>
+    <title>Admin Panel</title>
+    <script>
+        let assignments = JSON.parse(localStorage.getItem("assignments")) || {};
+        let completedAssignments = JSON.parse(localStorage.getItem("completedAssignments")) || {};
+
+        function createAssignment() {
+            let name = prompt("Enter assignment name:");
+            if (!name) return;
+            assignments[name] = [];
+            for (let i = 0; i < 40; i++) {
+                let question = prompt(`Enter question ${i + 1} (e.g., 5+5, 6-2, 3x3, 8/4):`);
+                if (!question) break;
+                assignments[name].push(question);
+            }
+            localStorage.setItem("assignments", JSON.stringify(assignments));
+            alert("Assignment saved!");
+        }
+        
+        function viewCompleted() {
+            let completedSection = document.getElementById("completedAssignments");
+            completedSection.innerHTML = "";
+            for (let [name, result] of Object.entries(completedAssignments)) {
+                let div = document.createElement("div");
+                div.innerHTML = `<h3>${name}</h3>`;
+                result.details.forEach(entry => {
+                    if (!entry.correct) {
+                        div.innerHTML += `<p>${entry.question} - Your Answer: ${entry.userAnswer}, Correct Answer: ${entry.correctAnswer}</p>`;
+                    }
+                });
+                completedSection.appendChild(div);
+            }
+        }
+    </script>
+</head>
+<body onload="viewCompleted()">
+    <h1>Admin Panel</h1>
+    <button onclick="createAssignment()">Create Assignment</button>
+    <h2>Completed Assignments</h2>
+    <div id="completedAssignments"></div>
+</body>
+</html>
